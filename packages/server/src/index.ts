@@ -303,7 +303,7 @@ async function getServer(options: RunOptions = {}) {
                   currentToolArgs = ''
                   currentToolId = ''
                 } catch (e) {
-                  console.log(e);
+                  req.log.error(e);
                 }
                 return undefined;
               }
@@ -431,6 +431,10 @@ async function getServer(options: RunOptions = {}) {
 
   process.on("unhandledRejection", (reason, promise) => {
     serverInstance.app.log.error("Unhandled rejection at:", promise, "reason:", reason);
+  });
+
+  process.on("SIGTERM", () => {
+    event.removeAllListeners();
   });
 
   return serverInstance;
