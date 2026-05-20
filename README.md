@@ -572,6 +572,56 @@ jobs:
 
 This setup allows for interesting automations, like running tasks during off-peak hours to reduce API costs.
 
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**Claude Code Router service won't start**
+
+- Ensure no other process is using port 3456: `lsof -i :3456`
+- Check logs at `~/.claude-code-router/logs/` for error details
+- Verify your `config.json` is valid JSON (try [jsonformatter.org](https://jsonformatter.org))
+
+**Requests not routing through the router**
+
+- Confirm the service is running: `ccr status`
+- If using `ccr code`, ensure you're not overriding `ANTHROPIC_BASE_URL` elsewhere
+- Check that your provider configuration includes the model you're trying to use
+
+**"Connection refused" or "Failed to fetch" errors**
+
+- Verify `HOST` is set correctly in `config.json` (default `127.0.0.1` for local)
+- If accessing remotely, set `HOST` to `0.0.0.0` and ensure `APIKEY` is configured
+- Check your proxy settings if `PROXY_URL` is configured
+
+**Authentication errors (401/403)**
+
+- Ensure `APIKEY` in config matches what's being sent in the `Authorization` header
+- If using `ccr activate`, the API key is set automatically from your config
+
+**Model not found / routing not working as expected**
+
+- Verify the model exists in your provider's `models` array
+- For custom routing, check `CUSTOM_ROUTER_PATH` points to a valid JS file
+- Confirm your router configuration uses `provider,model` format (e.g., `deepseek,deepseek-chat`)
+
+**Stuck in non-interactive mode / process hangs**
+
+- Set `NON_INTERACTIVE_MODE: true` in your `config.json` for CI/CD environments
+- Ensure stdin is not being waiting for input when running in automation
+
+**Configuration changes not taking effect**
+
+- After editing `config.json`, restart the service: `ccr restart`
+- The router does not support hot-reload; a full restart is required
+
+**Logs location**
+
+- Server logs: `~/.claude-code-router/logs/ccr-*.log` (HTTP requests, API calls)
+- Application logs: `~/.claude-code-router/claude-code-router.log` (routing decisions)
+
+For additional help, join our [Discord](https://discord.gg/rdftVMaUcS) or open an issue on GitHub.
+
 ## 📝 Further Reading
 
 - [Project Motivation and How It Works](blog/en/project-motivation-and-how-it-works.md)
