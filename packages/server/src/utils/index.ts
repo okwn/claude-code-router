@@ -9,6 +9,21 @@ import {
   PLUGINS_DIR,
 } from "@CCR/shared";
 
+const normalizeConfigKeys = (config: any): any => {
+  // Normalize case-insensitive keys to their canonical form
+  const keyMap: Record<string, string> = {
+    providers: 'Providers',
+    router: 'Router',
+  };
+
+  const result: any = {};
+  for (const [key, value] of Object.entries(config)) {
+    const normalizedKey = keyMap[key.toLowerCase()] || key;
+    result[normalizedKey] = value;
+  }
+  return result;
+};
+
 // Function to interpolate environment variables in config values
 const interpolateEnvVars = (obj: any): any => {
   if (typeof obj === "string") {
@@ -71,8 +86,10 @@ export const readConfigFile = async () => {
     try {
       // Try to parse with JSON5 first (which also supports standard JSON)
       const parsedConfig = JSON5.parse(config);
+      // Normalize case-insensitive keys (Providers, Router)
+      const normalizedConfig = normalizeConfigKeys(parsedConfig);
       // Interpolate environment variables in the parsed config
-      return interpolateEnvVars(parsedConfig);
+      return interpolateEnvVars(normalizedConfig);
     } catch (parseError) {
       console.error(`Failed to parse config file at ${CONFIG_FILE}`);
       console.error("Error details:", (parseError as Error).message);
